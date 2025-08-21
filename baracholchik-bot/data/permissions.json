@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "name": "admin_all",
+    "description": "Полный доступ"
+  },
+  {
+    "id": 2,
+    "name": "user_casual",
+    "description": "Доступ к пользовательским функциям"
+  }
+
+]

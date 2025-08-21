@@ -1,0 +1,47 @@
+.
+├── Readme
+├── data
+│   ├── chats.json
+│   ├── filtered.json
+│   ├── filters.json
+│   ├── messages.json
+│   ├── permissions.json
+│   └── users.json
+├── debugSend.js
+├── index.js
+├── package-lock.json
+├── package.json
+├── src
+│   ├── bot.js
+│   ├── commands.js
+│   ├── db
+│   │   ├── ChatManager.js
+│   │   ├── Filter.js
+│   │   ├── FilterManager.js
+│   │   ├── Message.js
+│   │   ├── MessageManager.js
+│   │   ├── User.js
+│   │   └── UserManager.js
+│   └── handlers
+│       ├── callbacks
+│       ├── commands
+│       │   ├── chats.js
+│       │   ├── forbid.js
+│       │   ├── help.js
+│       │   ├── notify.js
+│       │   ├── permit.js
+│       │   ├── search.js
+│       │   ├── start.js
+│       │   └── subscribe.js
+│       ├── errors
+│       ├── events
+│       │   ├── message.js
+│       │   └── myChatMember.js
+│       ├── middleware
+│       │   └── requirePermission.js
+│       └── triggers
+│           ├── filterTrigger.js
+│           └── notifyNewFilteredTrigger.js
+└── structure.txt
+
+11 directories, 34 files

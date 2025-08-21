@@ -1,0 +1,28 @@
+{
+  "name": "baracholchik-spy",
+  "version": "1.0.0",
+  "description": "Telegram message forwarding bot",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "ts-node src/main.ts",
+    "dev": "ts-node --watch src/main.ts",
+    "build": "tsc",
+    "build-d": "docker build -t baracholchik-spy .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["telegram", "bot", "forwarding", "spy"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.0.1",
+    "prompt-sync": "^4.2.0",
+    "telegram": "^2.26.22"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "@types/prompt-sync": "^4.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
