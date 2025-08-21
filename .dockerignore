@@ -1,0 +1,44 @@
+
+
+# VCS
+.git
+.gitignore
+
+# Node artifacts
+node_modules
+dist
+coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env and secrets (keep examples)
+.env
+.env.*
+!env.example
+
+# IDE/editor configs
+.vscode
+.idea
+
+# Docker/Compose files not needed in build context
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# Runtime data and session artifacts
+data/
+!data/permissions.json
+sessions/
+anon.txt
+anon.txt.*
+
+# Misc
+tmp
+temp
+.cache
+
+# Docs
+README.md
+Readme.md

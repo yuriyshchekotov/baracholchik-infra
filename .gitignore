@@ -1,0 +1,50 @@
+# macOS
+.DS_Store
+Thumbs.db
+
+# Editors/IDE
+.idea/
+.vscode/
+
+# Logs
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.bak
+*.tmp
+
+# Node build artifacts
+node_modules/
+dist/
+out/
+coverage/
+**/.tsbuildinfo
+
+# Env files (keep examples)
+**/.env
+**/.env.local
+**/.env.*
+!**/.env.example
+!**/env.example
+
+# Temp/cache
+tmp/
+temp/
+.cache/
+
+# Docker (local overrides)
+docker-compose.override.yml
+
+# Project-specific ignores
+# bot runtime data but keep tracked permissions.json
+baracholchik-bot/data/*
+!baracholchik-bot/data/permissions.json
+
+# spy runtime data and sessions, plus secret session files
+baracholchik-spy/data/
+baracholchik-spy/sessions/
+baracholchik-spy/anon.txt
+baracholchik-spy/anon.txt.*
+
