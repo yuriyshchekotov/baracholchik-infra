@@ -79,6 +79,32 @@ class UserManager {
       this.saveUsers();
     }
   }
+  /**
+   * Add the very first admin user from ENV (ADMIN_TGID), if absent.
+   * This method only creates the user record; permission granting is handled elsewhere.
+   * Idempotent: safe to call at startup.
+   */
+  addFirstAdmin(): void {
+    const envId = process.env.ADMIN_TGID;
+    if (!envId) {
+      console.warn('[UserManager] addFirstAdmin: ADMIN_TGID is not set; skip creating initial admin');
+      return;
+    }
+
+    const id = Number(envId);
+    if (!Number.isFinite(id)) {
+      console.error(`[UserManager] addFirstAdmin: ADMIN_TGID="${envId}" is not a valid number; skipping`);
+      return;
+    }
+
+    if (this.getById(id)) {
+      console.log(`[UserManager] addFirstAdmin: user ${id} already exists; nothing to do`);
+      return;
+    }
+
+    this.addUserIfNotExists(id);
+    console.log(`[UserManager] addFirstAdmin: created initial admin user with id ${id}`);
+  }
 }
 
 export default new UserManager(); 

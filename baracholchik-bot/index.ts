@@ -1,3 +1,4 @@
+import ensurePrimeAdminExists from './src/bootstrap/ensurePrimeAdminExists';
 import 'dotenv/config';
 import { config } from 'dotenv';
 import bot from './src/bot';
@@ -6,6 +7,8 @@ import commands from './src/commands';
 config();
 
 console.log('🔑 BOT_TOKEN =', process.env.BOT_TOKEN ? '[OK]' : '[MISSING]');
+console.log('🔑 ADMIN_TGID =', process.env.ADMIN_TGID ? '[OK]' : '[MISSING]');
+ensurePrimeAdminExists();
 
 bot.telegram.getMe()
   .then((info) => {
