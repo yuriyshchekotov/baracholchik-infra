@@ -17,23 +17,48 @@ const apiHash = process.env.API_HASH!;
 const sessionFile = path.resolve(process.env.SESSION || "anon.txt");
 let session: StringSession;
 
-if (fs.existsSync(sessionFile)) {
-    const sessionString = fs.readFileSync(sessionFile, "utf8").trim();
-    if (sessionString && sessionString.length > 0) {
+const prompt = promptSync();
+
+async function authenticateNewSession(): Promise<TelegramClient> {
+    session = new StringSession("");
+    const client = new TelegramClient(session, apiId, apiHash, {
+        connectionRetries: 5,
+    });
+
+    await client.start({
+        phoneNumber: async () => prompt("Введите номер: ")!,
+        password: async () => prompt("Введите пароль (если есть): "),
+        phoneCode: async () => prompt("Введите код из Telegram: "),
+        onError: (err) => console.error(err),
+    });
+
+    const sessionData = (client.session && typeof client.session.save === "function") ? client.session.save() : "";
+    fs.writeFileSync(sessionFile, String(sessionData));
+    console.log(">> Сессия сохранена в файл:", sessionFile);
+
+    return client;
+}
+
+async function loadClient(): Promise<TelegramClient> {
+    if (fs.existsSync(sessionFile)) {
+        const sessionString = fs.readFileSync(sessionFile, "utf8").trim();
         try {
             session = new StringSession(sessionString);
             console.log(">> Сессия загружена из файла.");
+            const client = new TelegramClient(session, apiId, apiHash, {
+                connectionRetries: 5,
+            });
+            await client.connect();
+            if (!client.connected) throw new Error("Сессия невалидна");
+            return client;
         } catch (error) {
             console.log(">> Ошибка при загрузке сессии, создаем новую:", error);
-            session = new StringSession("");
+            return authenticateNewSession();
         }
     } else {
-        console.log(">> Файл сессии пуст, создаем новую сессию.");
-        session = new StringSession("");
+        console.log(">> Файл сессии не найден, создаем новую сессию.");
+        return authenticateNewSession();
     }
-} else {
-    console.log(">> Файл сессии не найден, создаем новую сессию.");
-    session = new StringSession("");
 }
 
 const sourceChat = process.env.SOURCE_CHAT!;
@@ -45,33 +70,27 @@ if (!rawTargetChats) {
 const targetChats = rawTargetChats.split(",").map((s) => s.trim()).filter(Boolean);
 
 async function main() {
-    const client = new TelegramClient(session, apiId, apiHash, {
-        connectionRetries: 5,
-    });
-
-    const prompt = promptSync();
-
-    await client.start({
-        phoneNumber: async () => prompt("Введите номер: ")!,
-        password: async () => prompt("Введите пароль (если есть): "),
-        phoneCode: async () => prompt("Введите код из Telegram: "),
-        onError: (err) => console.error(err),
-    });
-
-    const sessionData = (session as StringSession).save();
-    fs.writeFileSync(sessionFile, sessionData);
-    console.log(">> Сессия сохранена в файл:", sessionFile);
-
-    console.log(">> Успешный вход!");
-    console.log(">> Сессия сохранена:", client.session.save());
+    const client = await loadClient();
 
     await client.sendMessage("me", { message: "Я онлайн (бот-пересылка)" });
 
-    // Подписка на новые сообщения
+    // Разрешаем все targetChats в сущности один раз
+    const resolvedTargets = await Promise.all(
+        targetChats.map(async (target) => {
+            try {
+                const entity = await client.getEntity(target);
+                console.log(`>> Целевой чат '${target}' разрешён`);
+                return entity;
+            } catch (err) {
+                console.error(`‼️ Ошибка при разрешении '${target}':`, (err as Error).message);
+                return null;
+            }
+        })
+    );
+
     client.addEventHandler(async (event: NewMessageEvent) => {
         const message = event.message;
 
-        // Логируем всё, что приходит
         console.log(">> Событие NewMessage:");
         console.log(" - raw text:", message.message);
         console.log(" - sender ID:", message.senderId?.toString());
@@ -89,11 +108,16 @@ async function main() {
         const messageId = message.id;
         const link = `https://t.me/${sourceTag}/${messageId}`;
         const text = `${message.message || ""}\n\n🔗 ORIGIN: ${link}`;
-        console.log(`>> Поступило сообщение: "${text}"`);
+        console.log(`>> Поступило сообщение: \"${text}\"`);
 
-        for (const target of targetChats) {
-            await client.sendMessage(target.trim(), { message: text });
-            console.log(`>> Сообщение отправлено в: ${target}`);
+        for (const entity of resolvedTargets) {
+            if (!entity) continue;
+            try {
+                await client.sendMessage(entity, { message: text });
+                console.log(`>> Сообщение отправлено в:`, entity);
+            } catch (err) {
+                console.error("‼️ Ошибка при отправке:", (err as Error).message);
+            }
         }
     }, new NewMessage({}));
 
