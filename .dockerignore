@@ -14,7 +14,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Env and secrets (keep examples)
-.env
+baracholchik-spy/.env
 .env.*
 !env.example
 
