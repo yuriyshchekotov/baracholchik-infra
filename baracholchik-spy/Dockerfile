@@ -1,5 +1,6 @@
 # Use Node.js 20 Alpine as base image for smaller size
 FROM node:20-alpine AS base
+RUN corepack enable
 
 # Set working directory
 WORKDIR /app

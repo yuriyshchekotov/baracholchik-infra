@@ -1,6 +1,6 @@
 # 1. Базовый образ с Node.js
 FROM node:20-alpine
-
+RUN corepack enable
 # 2. Установим рабочую директорию
 WORKDIR /app
 
