@@ -9,6 +9,8 @@ export default async function handleSubscribeDialog(ctx: BotContext, session: Se
 
   const text = ctx.message.text.trim().toLowerCase();
 
+  console.log(`[Session] user=${userId} command=${session.command} step=${session.step}`);
+
   if (text === 'отмена' || text === '/cancel') {
     SessionManager.end(userId);
     await ctx.reply('Диалог подписки отменён.');
@@ -48,8 +50,8 @@ export default async function handleSubscribeDialog(ctx: BotContext, session: Se
       await ctx.reply('Выбери режим фильтрации:', {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'И', callback_data: 'filter_mode_and' }],
-            [{ text: 'ИЛИ', callback_data: 'filter_mode_or' }]
+            [{ text: 'И', callback_data: 'subscribe:and' }],
+            [{ text: 'ИЛИ', callback_data: 'subscribe:or' }]
           ]
         }
       });
@@ -63,37 +65,24 @@ export default async function handleSubscribeDialog(ctx: BotContext, session: Se
     }
 
     case 'askAndOr': {
-      const keywords = session.data.keywords;
+      const keywords = session.data?.keywords || [];
       const conjunction = text === 'и';
 
-      if (text !== 'и' && text !== 'или') {
-        await ctx.reply('Пожалуйста, ответь одним словом: *и* или *или*.');
+      // Support both button clicks (handled by callback) and text input
+      if (text === 'и' || text === 'или') {
+        const result = subscribeUserToFilter(userId, keywords, conjunction);
+        SessionManager.end(userId);
+
+        if (result.status === 'alreadyExists') {
+          await ctx.reply('Ты уже подписан на такой фильтр.');
+        } else {
+          await ctx.reply(`Фильтр "${result.name}" создан и добавлен в твою подписку.`);
+        }
         return;
       }
 
-      const result = subscribeUserToFilter(userId, keywords, conjunction);
-      SessionManager.end(userId);
-
-      if (result.status === 'alreadyExists') {
-        await ctx.reply('Ты уже подписан на такой фильтр.');
-      } else {
-        await ctx.reply(`Фильтр "${result.name}" создан и добавлен в твою подписку.`);
-      }
-      return;
-    }
-
-    case 'askAndOrConfirmed': {
-      const keywords = session.data.keywords;
-      const conjunction = session.data.conjunction ?? false;
-
-      const result = subscribeUserToFilter(userId, keywords, conjunction);
-      SessionManager.end(userId);
-
-      if (result.status === 'alreadyExists') {
-        await ctx.reply('Ты уже подписан на такой фильтр.');
-      } else {
-        await ctx.reply(`Фильтр "${result.name}" создан и добавлен в твою подписку.`);
-      }
+      // Invalid input - keep session active and prompt again
+      await ctx.reply('Пожалуйста, ответь одним словом: *и* или *или*. Или напиши "отмена" для отмены.');
       return;
     }
 

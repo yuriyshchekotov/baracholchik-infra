@@ -10,13 +10,13 @@ import User from "../db/User";
  * It is idempotent and safe to call on every startup.
  *
  * Behaviour:
- * 1) Reads ADMIN_TGID from env.
+ * 1) Reads ADMIN_TGID from .env.
  * 2) Creates the user if missing (via UserManager.addFirstAdmin()).
- * 3) Grants baseline permissions (admin_all, user_casuall) to that user.
+ * 3) Grants baseline permissions (admin_all, user_casual) to that user.
  * 4) Persists changes if any.
  */
 export default function ensurePrimeAdminExists(): void {
-  // Step 1: validate env
+  // Step 1: validate .env
   const raw = process.env.ADMIN_TGID;
   if (!raw) {
     console.warn("[bootstrap] ensurePrimeAdminExists: ADMIN_TGID is not set; skipping prime admin bootstrap");
@@ -44,7 +44,7 @@ export default function ensurePrimeAdminExists(): void {
   }
 
   // Step 3: grant baseline permissions using the User API
-  const requiredPerms = ["admin_all", "user_casuall"] as const;
+  const requiredPerms = ["admin_all", "user_casual"] as const;
   let changed = false;
 
   for (const p of requiredPerms) {

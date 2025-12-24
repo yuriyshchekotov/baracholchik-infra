@@ -10,6 +10,22 @@ const subscribeCommand = async (ctx: BotContext): Promise<void> => {
     return;
   }
 
+  // Check if user already has an active session
+  if (SessionManager.has(userId)) {
+    const existingSession = SessionManager.get(userId);
+    const action = existingSession?.command === 'subscribe' ? 'restart' : 'reject';
+    console.log(`[Subscribe] user=${userId} already in dialog: step=${existingSession?.step || 'unknown'} -> action=${action}`);
+    
+    if (action === 'restart') {
+      // End existing subscribe session and start new one
+      SessionManager.end(userId);
+    } else {
+      // Reject - user is in different dialog
+      await ctx.reply('У тебя уже активен другой диалог. Заверши его перед началом нового.');
+      return;
+    }
+  }
+
   const text = ctx.message && 'text' in ctx.message ? ctx.message.text : '';
   
   // Debug logging - BEFORE processing

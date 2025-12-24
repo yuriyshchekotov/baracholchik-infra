@@ -40,6 +40,8 @@ class SessionManager {
 
   end(userId: number): void {
     if (this.sessions.has(userId)) {
+      const session = this.sessions.get(userId);
+      console.log(`[Session] END user=${userId} command=${session?.command || 'unknown'} step=${session?.step || 'unknown'}`);
       this.sessions.delete(userId);
       this.saveToFile();
     }

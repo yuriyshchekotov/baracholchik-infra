@@ -37,6 +37,13 @@ const messageEventHandler = async (ctx: BotContext): Promise<void> => {
   if (userId && SessionManager.has(userId)) {
     const session = SessionManager.get(userId);
     if (session?.command === 'subscribe') {
+      // Check if user sent a command (other than /cancel) during active dialog
+      if (text.startsWith('/') && text !== '/cancel') {
+        SessionManager.end(userId);
+        await ctx.reply('Диалог подписки прерван. Используй команду /subscribe для начала нового диалога.');
+        return;
+      }
+      
       await handleSubscribeDialog(ctx, session);
       return;
     }
